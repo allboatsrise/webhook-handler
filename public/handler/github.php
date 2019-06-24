@@ -11,25 +11,21 @@ if (!$handler->validate()) {
   die();
 }
 
+$event = $handler->getEvent();
 $data = $handler->getData();
 
+// $event = 'push';
 // $data = [
-//   'action' => 'push',
 //   'data' => [
 //     'action' => 'push',
 //     'otherdata' => 'asdf',
 //   ],
 // ];
 
-if (empty($data['action'])) {
-  // this is not an actual action, just a test, so ignore it
-  return;
-}
-
 try {
   API::queueEvent([
     'type' => API::EVENT_TYPE_GITHUB,
-    'category' => $data['action'],
+    'category' => $event,
     'data' => $data,
   ]);
 } catch(\Exception $ex) {
