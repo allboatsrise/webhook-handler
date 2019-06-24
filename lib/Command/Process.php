@@ -33,19 +33,20 @@ class Process extends Command {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    if (!$this->getLock()) {
-      $output->writeln('Another process is already running this publish command.');
-      return;
-    }
-
     $events = API::getUnprocessedEvents();
-
-    // leave if there are no events to process
-    if (empty($events)) return;
 
     // output list of events
     if ($input->getOption('list')) {
       $output->write(print_r($events, true));
+      return;
+    }
+
+    // leave if there are no events to process
+    if (empty($events)) return;
+
+    // obtain lock
+    if (!$this->getLock()) {
+      $output->writeln('Another process is already running this publish command.');
       return;
     }
 
