@@ -14,7 +14,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 try {
   API::queueEvent([
     'type' => API::EVENT_TYPE_CONTENTSTACK,
-    'category' => $data['event'],
+    'category' => "{$data['module']}-{$data['event']}",
     'data' => $data,
   ]);
 } catch(\Exception $ex) {
