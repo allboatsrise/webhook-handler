@@ -1,0 +1,15 @@
+{
+    "name": "massedge/webhook-handler",
+    "description": "Queue up incoming webhook requests for handling at a later time.",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Andrej Pavlovic",
+            "email": "andrej.pavlovic@massedge.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^3.4",
+        "symfony/console": "^4.3"
+    }
+}
