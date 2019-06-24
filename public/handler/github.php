@@ -21,6 +21,11 @@ $data = $handler->getData();
 //   ],
 // ];
 
+if (empty($data['action'])) {
+  // this is not an actual action, just a test, so ignore it
+  return;
+}
+
 try {
   API::queueEvent([
     'type' => API::EVENT_TYPE_GITHUB,
