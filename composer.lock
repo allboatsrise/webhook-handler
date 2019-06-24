@@ -4,8 +4,50 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "206a91c6e97bc18683e592503e7ebe06",
+    "content-hash": "ce12d803ae9fd597bacf4fa9d2816d8d",
     "packages": [
+        {
+            "name": "dintel/php-github-webhook",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dintel/php-github-webhook.git",
+                "reference": "e6450ebdbc718b8d5fc6e5a2ae462d350232a0ce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dintel/php-github-webhook/zipball/e6450ebdbc718b8d5fc6e5a2ae462d350232a0ce",
+                "reference": "e6450ebdbc718b8d5fc6e5a2ae462d350232a0ce",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GitHubWebhook\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Dmitry Zbarski",
+                    "email": "dmitry.zbarski@gmail.com",
+                    "homepage": "http://zbarski.info",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple class for handling GitHub webhook calls",
+            "keywords": [
+                "git",
+                "webhook"
+            ],
+            "time": "2016-11-20T11:41:31+00:00"
+        },
         {
             "name": "phpoption/phpoption",
             "version": "1.5.0",
@@ -356,6 +398,55 @@
             "time": "2019-02-06T07:57:58+00:00"
         },
         {
+            "name": "symfony/process",
+            "version": "v4.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "856d35814cf287480465bb7a6c413bb7f5f5e69c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/856d35814cf287480465bb7a6c413bb7f5f5e69c",
+                "reference": "856d35814cf287480465bb7a6c413bb7f5f5e69c",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Process\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Process Component",
+            "homepage": "https://symfony.com",
+            "time": "2019-05-30T16:10:05+00:00"
+        },
+        {
             "name": "symfony/service-contracts",
             "version": "v1.1.5",
             "source": {
@@ -472,6 +563,8 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=7.1"
+    },
     "platform-dev": []
 }
