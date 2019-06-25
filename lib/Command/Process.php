@@ -74,7 +74,13 @@ class Process extends Command {
 
     // run the command line
     if (!empty($commandLine)) {
-      $process = CommandlineProcess::fromShellCommandline($commandLine);
+      $process = CommandlineProcess::fromShellCommandline(
+        $commandLine,
+        null,
+        null,
+        null,
+        null // disable timeout
+      );
       $process->run();
 
       // executes after the command finishes
