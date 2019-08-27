@@ -3,3 +3,4 @@
 /data/database.sqlite
 /.vscode
 /bin/app.process.lock
+/config.yml

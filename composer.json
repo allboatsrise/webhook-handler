@@ -10,10 +10,10 @@
     ],
     "require": {
         "php": ">=7.1",
-        "vlucas/phpdotenv": "^3.4",
         "symfony/console": "^4.3",
         "dintel/php-github-webhook": "^0.2.0",
-        "symfony/process": "^4.3"
+        "symfony/process": "^4.3",
+        "symfony/yaml": "^4.3"
     },
     "autoload": {
         "psr-4": {

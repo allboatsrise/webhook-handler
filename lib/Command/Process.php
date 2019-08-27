@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Exception\RuntimeException;
 
+use AllBoatsRise\WebhookHandler\Config;
 use AllBoatsRise\WebhookHandler\API;
 
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -50,46 +51,39 @@ class Process extends Command {
       return;
     }
 
-    $hasGitHubEvent = false;
-    foreach($events as $event) {
-      if ($event['type'] == API::EVENT_TYPE_GITHUB) {
-        $hasGitHubEvent = true;
-        break;
+    $handlerConfigs = Config::getHandlers();
+
+    foreach($handlerConfigs as $handlerConfig) {
+      foreach($events as $event) {
+        if ($event['type'] !== $handlerConfig['type']) continue;
+        if ($event['instance'] !== $handlerConfig['instance']) continue;
+        if (empty($handlerConfig['command'])) continue;
+
+        $commandLine = $handlerConfig['command'];
+
+        // run the command line
+        $process = CommandlineProcess::fromShellCommandline(
+          $commandLine,
+          null,
+          null,
+          null,
+          null // disable timeout
+        );
+        $process->start();
+
+        $process->wait(function($type, $buffer) {
+          if (CommandlineProcess::ERR === $type) {
+            fwrite(STDERR, $buffer);
+          } else {
+            fwrite(STDOUT, $buffer);
+          }
+        });
+
+        // executes after the command finishes
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
       }
-    }
-
-    $hasContentstackEvent = false;
-    foreach($events as $event) {
-      if ($event['type'] == API::EVENT_TYPE_CONTENTSTACK) {
-        $hasContentstackEvent = true;
-        break;
-      }
-    }
-
-    if ($hasGitHubEvent) {
-      $commandLine = $this->options['githubEventCommandline'];
-    } else if ($hasContentstackEvent) {
-      $commandLine = $this->options['contentstackEventCommandline'];
-    }
-
-    // run the command line
-    if (!empty($commandLine)) {
-      $process = CommandlineProcess::fromShellCommandline(
-        $commandLine,
-        null,
-        null,
-        null,
-        null // disable timeout
-      );
-      $process->run();
-
-      // executes after the command finishes
-      if (!$process->isSuccessful()) {
-          throw new ProcessFailedException($process);
-      }
-
-      $processOutput = $process->getOutput();
-      $output->writeln($processOutput);
     }
 
     API::markEventsAsProcessed(array_map(function($event) {

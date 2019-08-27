@@ -5,9 +5,6 @@ namespace AllBoatsRise\WebhookHandler;
 use PDO;
 
 class API {
-  const EVENT_TYPE_GITHUB = 'github';
-  const EVENT_TYPE_CONTENTSTACK = 'contentstack';
-  
   /** @var PDO */
   private static $db;
 
@@ -26,9 +23,10 @@ class API {
   static function queueEvent(array $event) {
     $db = self::getDatabaseConnection();
     $stmt = $db->prepare(<<<'TEXT'
-INSERT INTO webhook_event (type, category, data, created_at, modified_at)
+INSERT INTO webhook_event (type, instance, category, data, created_at, modified_at)
 VALUES (
   :type,
+  :instance,
   :category,
   :data,
   DATETIME('now'),
@@ -38,6 +36,7 @@ TEXT
     );
 
     $stmt->bindValue(':type', $event['type'], PDO::PARAM_STR);
+    $stmt->bindValue(':instance', $event['instance'], PDO::PARAM_STR);
     $stmt->bindValue(':category', $event['category'], PDO::PARAM_STR);
     $stmt->bindValue(':data', json_encode($event['data']), PDO::PARAM_STR);
 
@@ -47,7 +46,7 @@ TEXT
   static function getUnprocessedEvents() {
     $db = self::getDatabaseConnection();
     $stmt = $db->prepare(<<<'TEXT'
-SELECT id, type, category, data
+SELECT id, type, instance, category, data
 FROM webhook_event
 WHERE processed = 0
 ORDER BY id ASC

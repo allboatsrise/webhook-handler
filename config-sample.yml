@@ -1,0 +1,10 @@
+handlers:
+  - type: github
+    instance: #fill-in#
+    secret: #fill in#
+    command: echo "test1"
+
+  - type: contentstack
+    instance: #fill in"
+    command: echo "test2"
+

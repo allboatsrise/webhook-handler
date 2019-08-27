@@ -3,8 +3,25 @@ require '../../config.php';
 
 use GitHubWebhook\Handler;
 use AllBoatsRise\WebhookHandler\API;
+use AllBoatsRise\WebhookHandler\Config;
 
-$handler = new Handler(getenv('GITHUB_WEBHOOK_SECRET'), null);
+$instance = (isset($_GET['instance'])) ? $_GET['instance'] : null;
+$handlerConfig = null;
+
+foreach(Config::getHandlers() as $c) {
+  if (!empty($c['instance']) && $c['instance'] === $instance) {
+    $handlerConfig = $c;
+    break;
+  }
+}
+
+if (!$handlerConfig) {
+  header('HTTP/1.0 400 Bad Request');
+  die();
+}
+
+
+$handler = new Handler($handlerConfig['secret'], null);
 
 if (!$handler->validate()) {
   header('HTTP/1.0 400 Bad Request');
@@ -24,7 +41,8 @@ $data = $handler->getData();
 
 try {
   API::queueEvent([
-    'type' => API::EVENT_TYPE_GITHUB,
+    'type' => 'github',
+    'instance' => $instance,
     'category' => $event,
     'data' => $data,
   ]);
