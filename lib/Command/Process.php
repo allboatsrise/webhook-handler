@@ -53,42 +53,67 @@ class Process extends Command {
 
     $handlerConfigs = Config::getHandlers();
 
+    // process events
+    $unprocessedEvents = $events;
+    $processedCommands = [];
     foreach($handlerConfigs as $handlerConfig) {
-      foreach($events as $event) {
-        if ($event['type'] !== $handlerConfig['type']) continue;
-        if ($event['instance'] !== $handlerConfig['instance']) continue;
-        if (empty($handlerConfig['command'])) continue;
-
-        $commandLine = $handlerConfig['command'];
-
-        // run the command line
-        $process = CommandlineProcess::fromShellCommandline(
-          $commandLine,
-          null,
-          null,
-          null,
-          null // disable timeout
-        );
-        $process->start();
-
-        $process->wait(function($type, $buffer) {
-          if (CommandlineProcess::ERR === $type) {
-            fwrite(STDERR, $buffer);
-          } else {
-            fwrite(STDOUT, $buffer);
+      $unprocessedEvents = \array_reduce($unprocessedEvents, function($events, $event) use ($handlerConfig, $processedCommands) {
+        // check if event matches handler
+        if ($event['type'] === $handlerConfig['type']
+          && $event['instance'] === $handlerConfig['instance']
+        ) {
+          // check if there is a command to run that hasn't been run yet
+          if (!empty($handlerConfig['command'])
+            && !in_array($handlerConfig['command'], $processedCommands)
+          ) {
+            // run command
+            $commandLine = $handlerConfig['command'];
+            self::processCommand($commandLine);
+  
+            // track processed commands
+            $processedCommands[] = $commandLine;
           }
-        });
 
-        // executes after the command finishes
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+          // mark event as processed
+          API::markEventsAsProcessed([$event['id']]);
+        } else {
+          // event doesn't match handler, so keep as unprocessed
+          $unprocessedEvents[] = $event;
         }
-      }
+      }, []);
     }
 
-    API::markEventsAsProcessed(array_map(function($event) {
-      return $event['id'];
-    }, $events));
+    // any events that didn't match a handler mark as processed
+    if (sizeof($unprocessedEvents) > 0) {
+      API::markEventsAsProcessed(array_map(function($event) {
+        return $event['id'];
+      }, $unprocessedEvents));
+    }
+  }
+
+  private static function processCommand($commandLine) {
+    // run the command line
+    $process = CommandlineProcess::fromShellCommandline(
+      $commandLine,
+      null,
+      null,
+      null,
+      null // disable timeout
+    );
+    $process->start();
+
+    $process->wait(function($type, $buffer) {
+      if (CommandlineProcess::ERR === $type) {
+        fwrite(STDERR, $buffer);
+      } else {
+        fwrite(STDOUT, $buffer);
+      }
+    });
+
+    // executes after the command finishes
+    if (!$process->isSuccessful()) {
+        throw new ProcessFailedException($process);
+    }
   }
 
   private function getLock() {
