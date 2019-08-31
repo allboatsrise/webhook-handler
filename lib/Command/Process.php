@@ -57,7 +57,7 @@ class Process extends Command {
     $unprocessedEvents = $events;
     $processedCommands = [];
     foreach($handlerConfigs as $handlerConfig) {
-      $unprocessedEvents = \array_reduce($unprocessedEvents, function($events, $event) use ($handlerConfig, $processedCommands) {
+      $unprocessedEvents = \array_reduce($unprocessedEvents, function($unprocessedEvents, $event) use ($handlerConfig, &$processedCommands) {
         // check if event matches handler
         if ($event['type'] === $handlerConfig['type']
           && $event['instance'] === $handlerConfig['instance']
@@ -80,6 +80,8 @@ class Process extends Command {
           // event doesn't match handler, so keep as unprocessed
           $unprocessedEvents[] = $event;
         }
+
+        return $unprocessedEvents;
       }, []);
     }
 
