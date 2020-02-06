@@ -34,16 +34,14 @@ class Process extends Command {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $events = API::getUnprocessedEvents();
-
     // output list of events
     if ($input->getOption('list')) {
-      $output->write(print_r($events, true));
+      foreach(API::getUnprocessedEvents() as $event) {
+        unset($event['data']);
+        $output->write(print_r($event, true));
+      }
       return;
     }
-
-    // leave if there are no events to process
-    if (empty($events)) return;
 
     // obtain lock
     if (!$this->getLock()) {
@@ -54,42 +52,45 @@ class Process extends Command {
     $handlerConfigs = Config::getHandlers();
 
     // process events
-    $unprocessedEvents = $events;
+    $unprocessedEventIds = [];
     $processedCommands = [];
-    foreach($handlerConfigs as $handlerConfig) {
-      $unprocessedEvents = \array_reduce($unprocessedEvents, function($unprocessedEvents, $event) use ($handlerConfig, &$processedCommands) {
+    foreach(API::getUnprocessedEvents() as $event) {
+      foreach($handlerConfigs as $handlerConfig) {
         // check if event matches handler
-        if ($event['type'] === $handlerConfig['type']
-          && $event['instance'] === $handlerConfig['instance']
+        if ($event['type'] !== $handlerConfig['type']
+          || $event['instance'] !== $handlerConfig['instance']
         ) {
-          // check if there is a command to run that hasn't been run yet
-          if (!empty($handlerConfig['command'])
-            && !in_array($handlerConfig['command'], $processedCommands)
-          ) {
-            // run command
-            $commandLine = $handlerConfig['command'];
-            self::processCommand($commandLine);
-  
-            // track processed commands
-            $processedCommands[] = $commandLine;
-          }
-
-          // mark event as processed
-          API::markEventsAsProcessed([$event['id']]);
-        } else {
-          // event doesn't match handler, so keep as unprocessed
-          $unprocessedEvents[] = $event;
+          continue;
         }
 
-        return $unprocessedEvents;
-      }, []);
+        // check if there is a command to run that hasn't been run yet
+        if (!empty($handlerConfig['command'])
+          && !in_array($handlerConfig['command'], $processedCommands)
+        ) {
+          // run command
+          $commandLine = $handlerConfig['command'];
+          $output->writeln(
+            sprintf('Running command (%s): %s', $handlerConfig['instance'], $commandLine),
+            OutputInterface::VERBOSITY_VERBOSE
+          );
+          self::processCommand($commandLine);
+
+          // track processed commands
+          $processedCommands[] = $commandLine;
+        }
+
+        // mark event as processed
+        API::markEventsAsProcessed([$event['id']]);
+        continue 2;
+      }
+      
+      // event doesn't match handler, so keep as unprocessed
+      $unprocessedEventIds[] = $event['id'];
     }
 
     // any events that didn't match a handler mark as processed
-    if (sizeof($unprocessedEvents) > 0) {
-      API::markEventsAsProcessed(array_map(function($event) {
-        return $event['id'];
-      }, $unprocessedEvents));
+    if (sizeof($unprocessedEventIds) > 0) {
+      API::markEventsAsProcessed($unprocessedEventIds);
     }
   }
 

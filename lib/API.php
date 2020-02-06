@@ -43,6 +43,9 @@ TEXT
     $stmt->execute();
   }
 
+  /**
+   * @return Generator
+   */
   static function getUnprocessedEvents() {
     $db = self::getDatabaseConnection();
     $stmt = $db->prepare(<<<'TEXT'
@@ -55,12 +58,10 @@ TEXT
 
     $stmt->execute();
 
-    $rows = $stmt->fetchAll();
-
-    return array_map(function($row) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $row['data'] = \json_decode($row['data'], true);
-      return $row;
-    }, $rows);
+      yield $row;
+    }
   }
 
   static function markEventsAsProcessed(array $eventIds) {
