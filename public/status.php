@@ -9,6 +9,12 @@ use AllBoatsRise\WebhookHandler\API;
     <meta charset="UTF-8">
     <title>Webhook Handler Log</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    <style type="text/css">
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    </style>
   </head>
 <body>
   <h3>Status</h3>
@@ -23,12 +29,12 @@ use AllBoatsRise\WebhookHandler\API;
     </tr>
     <?php foreach(API::getEvents() as $event):
       $createdAt = new DateTime($event['created_at'], new DateTimeZone('UTC'));
-      $createdAt->setTimezone('America/Los_Angeles');
+      $createdAt->setTimezone(new DateTimeZone('America/Los_Angeles'));
 
       $processedAt = null;
       if ($event['processed'] == 1) {
         $processedAt = new DateTime($event['processed_at'], new DateTimeZone('UTC'));
-        $processedAt->setTimezone('America/Los_Angeles');
+        $processedAt->setTimezone(new DateTimeZone('America/Los_Angeles'));
       }
       ?>
       <tr>

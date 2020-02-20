@@ -82,12 +82,12 @@ TEXT
   /**
    * @return Generator
    */
-  static function getEvents($limit = 50) {
+  static function getEvents($limit = 200) {
     $db = self::getDatabaseConnection();
     $stmt = $db->prepare(<<<'TEXT'
 SELECT id, type, instance, category, data, created_at, modified_at, processed_at
 FROM webhook_event
-ORDER BY datetime(created_at) DESC
+ORDER BY id DESC
 LIMIT :limit
 TEXT
     );
