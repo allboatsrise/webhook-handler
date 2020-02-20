@@ -85,7 +85,7 @@ TEXT
   static function getEvents($limit = 200) {
     $db = self::getDatabaseConnection();
     $stmt = $db->prepare(<<<'TEXT'
-SELECT id, type, instance, category, data, created_at, modified_at, processed_at
+SELECT id, type, instance, category, data, processed, created_at, modified_at, processed_at
 FROM webhook_event
 ORDER BY id DESC
 LIMIT :limit
