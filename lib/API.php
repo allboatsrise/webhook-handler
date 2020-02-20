@@ -68,7 +68,7 @@ TEXT
     $db = self::getDatabaseConnection();
     $stmt = $db->prepare(<<<'TEXT'
 UPDATE webhook_event
-SET processed = 1, modified_at = DATETIME('now')
+SET processed = 1, modified_at = DATETIME('now'), processed_at = DATETIME('now')
 WHERE id = :id
 TEXT
     );
@@ -76,6 +76,29 @@ TEXT
     foreach($eventIds as $eventId) {
       $stmt->bindValue(':id', $eventId, PDO::PARAM_INT);
       $stmt->execute();
+    }
+  }
+
+  /**
+   * @return Generator
+   */
+  static function getEvents($limit = 50) {
+    $db = self::getDatabaseConnection();
+    $stmt = $db->prepare(<<<'TEXT'
+SELECT id, type, instance, category, data, created_at, modified_at, processed_at
+FROM webhook_event
+ORDER BY datetime(created_at) DESC
+LIMIT :limit
+TEXT
+    );
+
+    $stmt->execute([
+      ':limit' => $limit
+    ]);
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $row['data'] = \json_decode($row['data'], true);
+      yield $row;
     }
   }
 }
