@@ -48,19 +48,32 @@ TEXT
    */
   static function getUnprocessedEvents() {
     $db = self::getDatabaseConnection();
+
     $stmt = $db->prepare(<<<'TEXT'
-SELECT id, type, instance, category, data
+SELECT id
 FROM webhook_event
 WHERE processed = 0
 ORDER BY id ASC
 TEXT
     );
-
     $stmt->execute();
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-      $row['data'] = \json_decode($row['data'], true);
-      yield $row;
+    $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    $stmt2 = $db->prepare(<<<'TEXT'
+SELECT id, type, instance, category, data
+FROM webhook_event
+WHERE id = :id
+TEXT
+    );
+
+    foreach($ids as $id) {
+      $stmt2->execute([':id' => $id]);
+
+      while ($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+        $row['data'] = \json_decode($row['data'], true);
+        yield $row;
+      }
     }
   }
 
