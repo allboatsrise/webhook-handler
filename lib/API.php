@@ -59,6 +59,7 @@ TEXT
     $stmt->execute();
 
     $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $stmt->closeCursor();
 
     $stmt2 = $db->prepare(<<<'TEXT'
 SELECT id, type, instance, category, data
@@ -70,7 +71,8 @@ TEXT
     foreach($ids as $id) {
       $stmt2->execute([':id' => $id]);
 
-      while ($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+      if ($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+        $stmt2->closeCursor();
         $row['data'] = \json_decode($row['data'], true);
         yield $row;
       }
